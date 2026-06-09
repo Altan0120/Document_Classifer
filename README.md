@@ -33,7 +33,7 @@ Document_Classifier/
 
 ### 2. Cài đặt môi trường 
 ```bash
-pip install -r requirements.txt
+pip install -r requirement.txt
 ```
 
 ### 3. Khởi chạy ứng dụng 
