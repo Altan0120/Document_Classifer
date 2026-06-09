@@ -1,10 +1,10 @@
-# Hệ Thống Phân Loại Tin Tức Tiếng Việt Sử Dụng Học Sâu (PhoBERT & FastAPI)
+# Hệ Thống Phân Loại Văn Bản Tiếng Việt Sử Dụng PhoBERT 
 
 Ứng dụng web hoàn chỉnh (End-to-End) cho phép người dùng nhập văn bản thô hoặc tải lên các định dạng tài liệu phổ biến (`.pdf`, `.docx`, `.txt`) để tự động phân loại vào 18 danh mục tin tức tiếng Việt khác nhau với độ chính xác cao.
 
 ---
 
-## 📁 Cấu Trúc Thư Mục Hệ Thống
+## Cấu Trúc Thư Mục Hệ Thống
 
 ```text
 Document_Classifier/
@@ -24,3 +24,23 @@ Document_Classifier/
 ├── api.py                     # AI Server mở cổng API (FastAPI Backend)
 ├── requirements.txt           # Danh sách các thư viện Python cần cài đặt
 └── .gitignore                 # Cấu hình chặn các file rác và file quá nặng lên Git
+```
+---
+
+## Hướng dẫn cài đặt
+### 1. Tải và thêm model cùng các file cấu hình vào thư mục ***/Document_Classifer/phobert_news***
+[Link Drive](https://drive.google.com/drive/folders/1npZnpOrsWy05fsjYuPWNB1Yoxofto_A9?usp=sharing)
+
+### 2. Cài đặt môi trường 
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Khởi chạy ứng dụng 
+```bash
+python -m uvicorn api:app --port 8000 --reload
+```
+### 4. Giao diện Web
+Mở trực tiếp file ***index.html***  
+
+
