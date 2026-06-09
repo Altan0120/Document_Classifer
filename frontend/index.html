@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phân loại tài liệu</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --page: #f5f7fb;
+      --surface: #ffffff;
+      --surface-soft: #f8fafc;
+      --text: #172033;
+      --muted: #667085;
+      --line: #d9e0ec;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --success-bg: #ecfdf5;
+      --success-border: #9ee6c3;
+      --success-text: #075e45;
+      --shadow: 0 18px 45px rgba(23, 32, 51, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Be Vietnam Pro", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+      color: var(--text);
+      background: linear-gradient(135deg, #f5f7fb 0%, #eef6f3 100%);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .app {
+      width: min(100%, 900px);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid rgba(217, 224, 236, 0.9);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: clamp(24px, 4vw, 42px);
+    }
+
+    .header {
+      margin-bottom: 28px;
+      text-align: center;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 40px);
+      line-height: 1.12;
+      letter-spacing: 0;
+    }
+
+    .header p {
+      margin: 10px auto 0;
+      max-width: 580px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .input-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .input-panel {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+      min-width: 0;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface-soft);
+    }
+
+    .panel-header {
+      display: grid;
+      gap: 4px;
+    }
+
+    .panel-header h2 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.3;
+      letter-spacing: 0;
+    }
+
+    .panel-header p,
+    .helper-text {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    label {
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 250px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      color: var(--text);
+      background: #ffffff;
+      font: inherit;
+      line-height: 1.55;
+      outline: none;
+      transition: border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    textarea:focus,
+    .file-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.14);
+    }
+
+    .textarea-footer {
+      display: flex;
+      justify-content: flex-end;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .upload-zone {
+      display: grid;
+      place-items: center;
+      min-height: 250px;
+      padding: 20px;
+      border: 1.5px dashed #b8c4d8;
+      border-radius: 8px;
+      background: #ffffff;
+      text-align: center;
+      transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+    }
+
+    .upload-zone:focus-within,
+    .upload-zone:hover {
+      border-color: var(--primary);
+      background: #fbfcff;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+    }
+
+    .upload-content {
+      display: grid;
+      gap: 10px;
+      justify-items: center;
+    }
+
+    .upload-icon {
+      display: grid;
+      place-items: center;
+      width: 52px;
+      height: 52px;
+      border-radius: 8px;
+      background: #e8efff;
+      color: var(--primary-dark);
+      font-size: 24px;
+      font-weight: 900;
+    }
+
+    .file-input {
+      width: 100%;
+      max-width: 270px;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .file-input::file-selector-button {
+      border: 0;
+      border-radius: 6px;
+      background: var(--primary);
+      color: #ffffff;
+      font-weight: 800;
+      padding: 10px 14px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+
+    .actions {
+      display: grid;
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    button {
+      min-height: 52px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--primary);
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 800;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 160ms ease, transform 160ms ease, opacity 160ms ease;
+    }
+
+    button:hover:not(:disabled) {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.68;
+    }
+
+    .loading,
+    .result {
+      display: none;
+      border-radius: 8px;
+      padding: 16px;
+      font-weight: 700;
+    }
+
+    .loading {
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+      background: var(--surface-soft);
+      border: 1px solid var(--line);
+    }
+
+    .loading.is-visible,
+    .result.is-visible {
+      display: flex;
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px solid #d4dcea;
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 850ms linear infinite;
+      flex: 0 0 auto;
+    }
+
+    .result {
+      justify-content: space-between;
+      gap: 16px;
+      color: var(--success-text);
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+    }
+
+    .category {
+      text-transform: uppercase;
+      overflow-wrap: anywhere;
+    }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (max-width: 760px) {
+      .input-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 540px) {
+      body {
+        padding: 14px;
+      }
+
+      .card {
+        padding: 22px;
+      }
+
+      .result {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <section class="card" aria-labelledby="app-title">
+      <div class="header">
+        <h1 id="app-title">Phân loại tài liệu</h1>
+        <p>Nhập văn bản hoặc tải lên tài liệu để hệ thống dự đoán danh mục phù hợp.</p>
+      </div>
+
+      <form id="classificationForm">
+        <div class="input-grid" aria-label="Khu vực nhập dữ liệu">
+          <section class="input-panel" aria-labelledby="text-panel-title">
+            <div class="panel-header">
+              <h2 id="text-panel-title">Nhập văn bản trực tiếp</h2>
+              <p>Ưu tiên dùng nội dung trong ô này khi phân loại.</p>
+            </div>
+
+            <label for="documentText">Nội dung tài liệu</label>
+            <textarea id="documentText" placeholder="Nhập hoặc dán nội dung tài liệu tại đây..."></textarea>
+            <div class="textarea-footer">
+              <span id="wordCount">0 / 1000 từ</span>
+            </div>
+          </section>
+
+          <section class="input-panel" aria-labelledby="file-panel-title">
+            <div class="panel-header">
+              <h2 id="file-panel-title">Tải tệp tài liệu</h2>
+              <p>Chọn tệp khi bạn chưa nhập văn bản trực tiếp.</p>
+            </div>
+
+            <label for="fileInput">Tệp cần phân loại</label>
+            <div class="upload-zone">
+              <div class="upload-content">
+                <span class="upload-icon" aria-hidden="true">↑</span>
+                <input class="file-input" id="fileInput" type="file" accept=".pdf,.txt,.docx" />
+                <p class="helper-text">Hỗ trợ TXT, DOCX, PDF (Tối đa 5MB)</p>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="actions">
+          <button id="submitButton" type="submit">Phân loại</button>
+
+          <div id="loading" class="loading" role="status" aria-live="polite">
+            <span class="spinner" aria-hidden="true"></span>
+            <span>Đang phân loại tài liệu...</span>
+          </div>
+
+          <div id="resultBox" class="result" aria-live="polite">
+            <span>Danh mục dự đoán</span>
+            <strong id="category" class="category"></strong>
+          </div>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+
+    const API_URL = `http://${window.location.hostname}:8000/api/classify`;
+    // const API_URL = `http://localhost:8000/api/classify`;
+    const MAX_WORDS = 1000;
+    const MAX_PDF_PAGES = 5;
+    const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
+
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
+
+    const form = document.getElementById("classificationForm");
+    const fileInput = document.getElementById("fileInput");
+    const textarea = document.getElementById("documentText");
+    const wordCount = document.getElementById("wordCount");
+    const submitButton = document.getElementById("submitButton");
+    const loading = document.getElementById("loading");
+    const resultBox = document.getElementById("resultBox");
+    const categoryElement = document.getElementById("category");
+
+    textarea.addEventListener("input", () => {
+      if (textarea.value.trim().length > 0) {
+        fileInput.value = "";
+      }
+
+      updateWordCount();
+    });
+
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files[0];
+
+      if (!file) {
+        return;
+      }
+
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        alert("Tệp vượt quá dung lượng cho phép 5MB. Vui lòng chọn tệp nhỏ hơn.");
+        fileInput.value = "";
+        return;
+      }
+
+      textarea.value = "";
+      updateWordCount();
+    });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      setLoadingState(true);
+      hideResult();
+
+      try {
+        const rawText = await getDocumentText();
+        const documentText = truncateToWordLimit(rawText, MAX_WORDS);
+
+        if (!documentText) {
+          throw new Error("Vui lòng nhập văn bản hoặc chọn một file hợp lệ.");
+        }
+
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ documentText }),
+        });
+
+        const payload = await response.json();
+
+        if (!response.ok) {
+          throw new Error(payload.error || "Không thể phân loại tài liệu.");
+        }
+
+        // Bắt chính xác 2 trường dữ liệu từ FastAPI trả về
+        const category = payload.category;
+        const confidence = payload.confidence;
+
+        if (!category) {
+          throw new Error("Phản hồi không chứa category.");
+        }
+
+        // Truyền cả 2 biến vào hàm hiển thị
+        showResult(category, confidence);
+      } catch (error) {
+        console.error(error);
+        alert(error.message || "Đã có lỗi xảy ra. Vui lòng thử lại.");
+      } finally {
+        setLoadingState(false);
+      }
+    });
+
+    async function getDocumentText() {
+      const typedText = textarea.value.trim();
+
+      if (typedText) {
+        return typedText;
+      }
+
+      const file = fileInput.files[0];
+
+      if (!file) {
+        return "";
+      }
+
+      const extension = getFileExtension(file.name);
+
+      if (extension === "txt") {
+        return extractTextFromTxt(file);
+      }
+
+      if (extension === "docx") {
+        return extractTextFromDocx(file);
+      }
+
+      if (extension === "pdf") {
+        return extractTextFromPdf(file);
+      }
+
+      throw new Error("Định dạng file không được hỗ trợ.");
+    }
+
+    function getFileExtension(fileName) {
+      return fileName.split(".").pop().toLowerCase();
+    }
+
+    function truncateToWordLimit(text, limit) {
+      return text
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, limit)
+        .join(" ");
+    }
+
+    function updateWordCount() {
+      const count = textarea.value.trim()
+        ? textarea.value.trim().split(/\s+/).filter(Boolean).length
+        : 0;
+
+      wordCount.textContent = `${count} / ${MAX_WORDS} từ`;
+    }
+
+    // Extracts plain text from .txt files using the browser FileReader API.
+    function extractTextFromTxt(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => resolve(String(reader.result || ""));
+        reader.onerror = () => reject(new Error("Không thể đọc file TXT."));
+        reader.readAsText(file);
+      });
+    }
+
+    // Extracts raw text from .docx files using Mammoth's browser build.
+    async function extractTextFromDocx(file) {
+      const arrayBuffer = await file.arrayBuffer();
+      const result = await mammoth.extractRawText({ arrayBuffer });
+      return result.value || "";
+    }
+
+// Extracts text from the first few pages of a PDF using Mozilla PDF.js.
+    async function extractTextFromPdf(file) {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const totalPages = Math.min(pdf.numPages, MAX_PDF_PAGES);
+      const pageTexts = [];
+
+      for (let pageNumber = 1; pageNumber <= totalPages; pageNumber += 1) {
+        const page = await pdf.getPage(pageNumber);
+        const textContent = await page.getTextContent();
+        
+        let pageText = "";
+        let lastItem = null;
+
+        for (const item of textContent.items) {
+          if (lastItem) {
+            // transform[4] là tọa độ X (chiều ngang), transform[5] là tọa độ Y (chiều dọc)
+            const prevX = lastItem.transform[4];
+            const prevY = lastItem.transform[5];
+            const prevWidth = lastItem.width;
+            const currentX = item.transform[4];
+            const currentY = item.transform[5];
+
+            // Nếu Y chênh lệch đáng kể -> rớt dòng
+            if (Math.abs(currentY - prevY) > 5) {
+              pageText += "\n";
+            }
+            // Nếu cùng dòng nhưng khoảng cách X lớn hơn 2 pixel (khoảng cách của dấu cách)
+            else if (currentX - (prevX + prevWidth) > 2) {
+              pageText += " ";
+            }
+          }
+          pageText += item.str;
+          lastItem = item;
+        }
+
+        // Dọn dẹp khoảng trắng dư thừa
+        pageTexts.push(pageText.replace(/\s+/g, ' ').trim());
+      }
+
+      return pageTexts.join("\n");
+    }
+    function setLoadingState(isLoading) {
+      submitButton.disabled = isLoading;
+      loading.classList.toggle("is-visible", isLoading);
+    }
+
+    // 2. Chỉnh sửa hàm showResult để ánh xạ (map) từ vựng
+    function showResult(category, confidence) {
+      // Nhận thẳng string từ backend, không cần categoryMap
+      let displayText = category;
+
+      // Nếu có điểm tự tin thì nối thêm vào chuỗi hiển thị
+      if (confidence) {
+        displayText += ` (Độ tự tin: ${confidence}%)`;
+      }
+
+      categoryElement.textContent = displayText;
+      resultBox.classList.add("is-visible");
+    }
+
+    function hideResult() {
+      categoryElement.textContent = "";
+      resultBox.classList.remove("is-visible");
+    }
+  </script>
+</body>
+
+</html>
